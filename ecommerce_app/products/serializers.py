@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from .models import User, Category, Product, ProductImage, Order, OrderItem, Payment, Address
+from .models import User, Category, Product, ProductImage, Order, OrderItem, Payment, Address, UserRole
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
-    role = serializers.CharField(read_only=True)
+    role = serializers.ChoiceField(choices=UserRole.choices, required=False, default=UserRole.CUSTOMER)
     
     class Meta:
         model = User
@@ -71,7 +71,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = ['payment_id', 'order', 'payment_method', 'payment_status', 'amount',
                   'transaction_id', 'created_at', 'updated_at']
-        read_only_fields = ['payment_id', 'amount', 'transaction_id', 'payment_status', 
+        read_only_fields = ['payment_id', 'transaction_id', 'payment_status', 
                             'created_at', 'updated_at']
         
 class AddressSerializer(serializers.ModelSerializer):
