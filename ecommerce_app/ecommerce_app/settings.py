@@ -154,6 +154,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
+    "USER_ID_FIELD": "user_id",          # <--- Important
+    "USER_ID_CLAIM": "user_id",          # <--- Token will carry this claim
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),   # 1 hour access token
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),      # Refresh token valid for 1 day
     'ROTATE_REFRESH_TOKENS': False,                   # optional, default is False
