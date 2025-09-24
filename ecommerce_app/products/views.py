@@ -11,7 +11,7 @@ from rest_framework.response import Response
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('email')
     serializer_class = UserSerializer
     
     def get_permissions(self):
@@ -24,13 +24,13 @@ class UserViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
     
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('name')
     serializer_class = CategorySerializer
     permission_classes = [IsAdminOrReadOnly]
     authentication_classes = (JWTAuthentication,)
     
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.all().order_by('name')
     serializer_class = ProductSerializer
     permission_classes = [IsAdminOrReadOnly]
     authentication_classes = (JWTAuthentication,)
@@ -41,41 +41,42 @@ class ProductViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description']
     # Fields you can order by
     ordering_fields = ['name', 'price', 'stock_quantity', 'created_at', 'updated_at']
+    ordering = ['name']  # Default ordering for DRF
     
 class ProductImageViewSet(viewsets.ModelViewSet):
-    queryset = ProductImage.objects.all()
+    queryset = ProductImage.objects.all().order_by('created_at')
     serializer_class = ProductImageSerializer
     permission_classes = [IsAdminOrReadOnly]
     authentication_classes = (JWTAuthentication,)
     
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
+    queryset = Order.objects.all().order_by('-created_at')
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = (JWTAuthentication,)
     
     # Users will view their own orders
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        return Order.objects.filter(user=self.request.user).order_by('created_at')
     
 class OrderItemViewSet(viewsets.ModelViewSet):
-    queryset = OrderItem.objects.all()
+    queryset = OrderItem.objects.all().order_by('created_at')
     serializer_class = OrderItemSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = (JWTAuthentication,)
     
     def get_queryset(self):
-        return OrderItem.objects.filter(order__user=self.request.user)
+        return OrderItem.objects.filter(order__user=self.request.user).order_by('created_at')
 
 class PaymentViewSet(viewsets.ModelViewSet):
-    queryset = Payment.objects.all()
+    queryset = Payment.objects.all().order_by('-created_at')
     serializer_class = PaymentSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = (JWTAuthentication,)
     
     def get_queryset(self):
         # Limit payments to those belonging to the current user's orders.
-        return Payment.objects.filter(order__user=self.request.user)
+        return Payment.objects.filter(order__user=self.request.user).order_by('-created_at')
     
     def update(self, request, *args, **kwargs):
         """
@@ -106,13 +107,13 @@ class PaymentViewSet(viewsets.ModelViewSet):
         )
         
 class AddressViewSet(viewsets.ModelViewSet):
-    queryset = Address.objects.all()
+    queryset = Address.objects.all().order_by('created_at')
     serializer_class = AddressSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = (JWTAuthentication,)
     
     def get_queryset(self):
-        return Address.objects.filter(user=self.request.user)
+        return Address.objects.filter(user=self.request.user).order_by('created_at')
     
     def perform_create(self, serializer):
         # Ensure the address is tied to the logged-in user
