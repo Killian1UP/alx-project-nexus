@@ -145,7 +145,7 @@ class Order(models.Model):
     order_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.PENDING)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -154,10 +154,17 @@ class Order(models.Model):
 
     def clean(self):
         super().clean()
-        if self.total_amount is not None and self.total_amount < 0:
+        if self.total_amount < 0:
             raise ValidationError({'total_amount': 'Total amount cannot be negative.'})
 
+    def update_total_amount(self):
+        """Recalculate total_amount from all related order items."""
+        total = sum(item.subtotal for item in self.items.all())
+        self.total_amount = total
+        super().save(update_fields=['total_amount'])
+
     def save(self, *args, **kwargs):
+        """Save the order itself; total_amount will be updated by order items."""
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -167,7 +174,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items')
     quantity = models.PositiveIntegerField()
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)  # price at time of order
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -176,16 +183,18 @@ class OrderItem(models.Model):
 
     def clean(self):
         super().clean()
-        if self.quantity is None or self.quantity < 1:
+        if self.quantity < 1:
             raise ValidationError({'quantity': 'Quantity must be at least 1.'})
-        if self.unit_price is None or self.unit_price < 0:
+        if self.unit_price < 0:
             raise ValidationError({'unit_price': 'Unit price cannot be negative.'})
 
     def save(self, *args, **kwargs):
-        # Ensure decimal multiplication and trigger validations
+        """Calculate subtotal and update parent order total automatically."""
         self.subtotal = Decimal(self.unit_price) * self.quantity
         self.full_clean()
         super().save(*args, **kwargs)
+        # Update parent order's total_amount
+        self.order.update_total_amount()
 
 
 class Payment(models.Model):
@@ -207,7 +216,8 @@ class Payment(models.Model):
             raise ValidationError({'amount': 'Amount cannot be negative.'})
 
     def save(self, *args, **kwargs):
-        self.full_clean()
+        if not self.transaction_id:
+            self.transaction_id = str(uuid.uuid4())
         super().save(*args, **kwargs)
 
 
