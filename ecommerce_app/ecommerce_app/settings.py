@@ -161,16 +161,16 @@ REST_FRAMEWORK = {
         "anon": "100/day",
     },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,  # adjust per your needs (e.g. 20 or 50)
+    'PAGE_SIZE': 20,  
 }
 
 SIMPLE_JWT = {
-    "USER_ID_FIELD": "user_id",          # <--- Important
-    "USER_ID_CLAIM": "user_id",          # <--- Token will carry this claim
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),   # 1 hour access token
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),      # Refresh token valid for 1 day
-    'ROTATE_REFRESH_TOKENS': False,                   # optional, default is False
-    'BLACKLIST_AFTER_ROTATION': True,                 # optional
+    "USER_ID_FIELD": "user_id",          
+    "USER_ID_CLAIM": "user_id",          
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),   
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),      
+    'ROTATE_REFRESH_TOKENS': False,                   
+    'BLACKLIST_AFTER_ROTATION': True,                 
 }
 
 # Browser security
