@@ -117,7 +117,7 @@ Refresh token when needed:
 Swagger UI is available at:
 
 ```
-https://<your-domain>/swagger/
+https://ikaelelo.pythonanywhere.com/swagger/
 ```
 
 ### Using Swagger:
@@ -134,7 +134,7 @@ https://<your-domain>/swagger/
 
 ### Option 2: Curl
 ```bash
-curl -H "Authorization: Bearer <access_token>" https://<your-domain>/api/products/
+curl -H "Authorization: Bearer <access_token>" https://ikaelelo.pythonanywhere.com/api/users/
 ```
 
 ---
